@@ -1,0 +1,74 @@
+# Device Connect PATCH — source of truth for merge_voice_pe_yaml.py (NOT standalone firmware).
+#
+# ⚠️  Flash device-connect-voice.full.yaml (generated), not this file.
+#
+# Regenerate full image:
+#   ./scripts/prepare_firmware.sh
+#
+# See: firmware/esphome/README.md
+
+substitutions:
+  dc_device_id: erivan01-voice
+  dc_tenant: erivan01
+  dc_zenoh_connect: ""  # e.g. tcp/192.168.1.10:7447 for LAN router
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+
+esphome:
+  name: device-connect-voice
+  friendly_name: Device Connect Voice
+  min_version: 2026.3.0
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Globals mirrored by device_connect RPCs (wire voice_assistant hooks in full merge)
+globals:
+  - id: dc_last_transcript
+    type: std::string
+    restore_value: no
+    initial_value: '""'
+  - id: voice_assistant_phase
+    type: int
+    restore_value: no
+    initial_value: "10"
+
+device_connect:
+  device_id: ${dc_device_id}
+  tenant: ${dc_tenant}
+  enabled: true
+  zenoh_connect: ${dc_zenoh_connect}
+  stt_backend: voice_assistant
+
+# Firmware RPC wiring (Phase 1) — map Device Connect to ESPHome IDs:
+#   get_button_state      → center_button, button_press_event
+#   trigger_center_button → script / voice_assistant / media_player actions per press_type
+#   adjust_volume         → script control_volume (increase_volume)
+#   set_volume            → media_player.volume_set on external_media_player
+#   play_media_url        → media_player.play on external_media_player
+#   play_announcement_url → announcement pipeline
+#   play_device_sound     → script play_sound
+#   get_led_status        → led_ring + voice_assistant_leds state
+#   set_led_color         → light.turn_on rgb on voice_assistant_leds; color_changed=true
+#   set_led_effect        → light.turn_on effect on voice_assistant_leds
+#   turn_led_off          → light.turn_off led_ring / voice_assistant_leds
+#   release_led_control   → lambda color_changed=false; script control_leds
+#   list_wake_word_models → micro_wake_word model table (okay_nabu, hey_jarvis, …)
+#   enable_wake_word_model → micro_wake_word.enable_model
+#   set_wake_word_sensitivity → wake_word_sensitivity select
+#   on_wake_word_detected (native) → trigger_wake_word RPC + wake_word_detected event
+#
+# voice_assistant:
+#   on_stt_end:
+#     - lambda: id(dc_last_transcript) = x;

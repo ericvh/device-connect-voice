@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "device-connect-voice"
+version = "0.1.0"
+description = "On-device Device Connect whisper/voice driver for Home Assistant Voice PE (ESPHome + contract sim)"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "device-connect-edge>=0.2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "device-connect-agent-tools",
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "ruff",
+]
+
+[project.scripts]
+device-connect-voice = "device_connect_voice.__main__:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,5 @@
+# Pin for scripts/merge_voice_pe_yaml.py — bump when refreshing device-connect-voice.full.yaml
+upstream_repo: esphome/home-assistant-voice-pe
+upstream_ref: dev
+upstream_file: home-assistant-voice.yaml
+upstream_url: https://raw.githubusercontent.com/esphome/home-assistant-voice-pe/dev/home-assistant-voice.yaml
